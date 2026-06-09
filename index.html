@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catatan Modern - Fitur Lengkap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+    <style>
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-slate-50 to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen flex items-center justify-center p-4 sm:p-8 font-sans text-slate-800 dark:text-slate-200 antialiased transition-colors duration-500">
+
+    <div class="fade-in w-full max-w-3xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl p-6 sm:p-10 rounded-3xl shadow-xl border border-white/60 dark:border-slate-700/60 transition-colors duration-500">
+        
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+            <div class="text-center sm:text-left">
+                <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-cyan-500 dark:from-indigo-400 dark:to-cyan-300 mb-2">Catatan Pintar</h1>
+                <p class="text-slate-500 dark:text-slate-400 text-sm">Rich text format & filter kata.</p>
+            </div>
+            <button id="themeToggle" class="p-3 bg-slate-100 dark:bg-slate-700 rounded-full hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors shadow-sm" title="Ganti Tema">
+                <span id="themeIcon" class="text-xl">🌙</span>
+            </button>
+        </div>
+
+        <div class="space-y-6">
+            <div class="group">
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 transition-colors">Kata Kunci Filter</label>
+                <input type="text" id="filterWords" 
+                    class="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all shadow-sm" 
+                    placeholder="misal: penting, segera">
+            </div>
+
+            <div class="flex items-center pt-2">
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="autoNumberToggle" class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:bg-slate-600 peer-checked:bg-indigo-500"></div>
+                    <span class="ml-3 text-sm font-semibold text-slate-700 dark:text-slate-300">Penomoran Baris Otomatis</span>
+                </label>
+            </div>
+
+            <div class="group">
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Isi Catatan</label>
+                
+                <div class="flex flex-wrap gap-2 mb-2 p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">
+                    <button onclick="insertFormat('bold')" class="w-8 h-8 flex items-center justify-center font-bold bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg shadow-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" title="Tebal (Bold)">B</button>
+                    <button onclick="insertFormat('italic')" class="w-8 h-8 flex items-center justify-center italic font-serif bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg shadow-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" title="Miring (Italic)">I</button>
+                    <div class="w-px h-8 bg-slate-300 dark:bg-slate-600 mx-1"></div>
+                    <button onclick="insertFormat('number')" class="px-3 h-8 flex items-center justify-center text-sm font-medium bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg shadow-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" title="List Angka">1.</button>
+                    <button onclick="insertFormat('checkbox')" class="px-3 h-8 flex items-center justify-center text-sm font-medium bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg shadow-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" title="Tugas (Checkbox)">☑</button>
+                </div>
+
+                <textarea id="noteInput" rows="6" 
+                    class="w-full p-4 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all shadow-sm resize-y" 
+                    placeholder="Ketik catatanmu di sini..."></textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Pratinjau Langsung</label>
+                <div id="highlightedResult" 
+                    class="w-full p-5 bg-slate-50/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 rounded-xl min-h-[150px] whitespace-pre-wrap text-slate-700 dark:text-slate-300 shadow-inner leading-relaxed">
+                    <span class="text-slate-400 dark:text-slate-500 italic">Hasil catatan akan muncul di sini...</span>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        const filterWordsInput = document.getElementById('filterWords');
+        const noteInput = document.getElementById('noteInput');
+        const highlightedResult = document.getElementById('highlightedResult');
+        const autoNumberToggle = document.getElementById('autoNumberToggle');
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+
+        // Tema
+        themeToggle.addEventListener('click', () => {
+            htmlElement.classList.toggle('dark');
+            document.getElementById('themeIcon').textContent = htmlElement.classList.contains('dark') ? '☀️' : '🌙';
+        });
+
+        // Keamanan
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Fungsi Toolbar: Memasukkan format ke dalam Textarea
+        function insertFormat(type) {
+            const start = noteInput.selectionStart;
+            const end = noteInput.selectionEnd;
+            const text = noteInput.value;
+            const selectedText = text.substring(start, end);
+            let replacement = '';
+
+            if (type === 'bold') replacement = `**${selectedText || 'Teks Tebal'}**`;
+            if (type === 'italic') replacement = `_${selectedText || 'Teks Miring'}_`;
+            if (type === 'number') replacement = selectedText ? `1. ${selectedText}` : `\n1. `;
+            if (type === 'checkbox') replacement = selectedText ? `- [ ] ${selectedText}` : `\n- [ ] `;
+
+            noteInput.value = text.substring(0, start) + replacement + text.substring(end);
+            noteInput.focus();
+            updateHighlight();
+        }
+
+        // Proses utama teks
+        function updateHighlight() {
+            let rawText = noteInput.value;
+            const filterString = filterWordsInput.value;
+
+            if (!rawText.trim()) {
+                highlightedResult.innerHTML = '<span class="text-slate-400 dark:text-slate-500 italic">Hasil catatan akan muncul di sini...</span>';
+                return;
+            }
+
+            // 1. Penomoran Otomatis Global (Toggle)
+            if (autoNumberToggle.checked) {
+                const lines = rawText.split('\n');
+                let counter = 1;
+                rawText = lines.map(line => line.trim().length > 0 ? `${counter++}. ${line}` : line).join('\n');
+            }
+
+            // 2. Amankan dari tag HTML liar
+            let processText = escapeHTML(rawText);
+
+            // 3. Highlight Filter Kata
+            if (filterString.trim()) {
+                const wordsToHighlight = filterString.split(',').map(w => escapeHTML(w.trim())).filter(w => w.length > 0);
+                if (wordsToHighlight.length > 0) {
+                    const escapedWords = wordsToHighlight.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+                    const regex = new RegExp(`(${escapedWords.join('|')})`, 'gi');
+                    const hlStyle = '<span class="bg-gradient-to-r from-yellow-200 to-yellow-300 dark:from-yellow-500 dark:to-yellow-600 text-yellow-900 dark:text-white font-medium px-1.5 py-0.5 rounded-md shadow-sm transition-all">$1</span>';
+                    processText = processText.replace(regex, hlStyle);
+                }
+            }
+
+            // 4. Ubah syntax format menjadi elemen visual HTML
+            
+            // Bold (**teks**)
+            processText = processText.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>');
+            
+            // Italic (_teks_)
+            processText = processText.replace(/_(.*?)_/g, '<em class="italic text-slate-800 dark:text-slate-100">$1</em>');
+            
+            // Checkbox Checked (- [x] atau - [X])
+            processText = processText.replace(/- \[[xX]\] (.*)/g, '<div class="flex items-center gap-3 mt-1.5"><input type="checkbox" checked disabled class="w-4 h-4 rounded border-slate-300 text-indigo-600"><span class="line-through opacity-60">$1</span></div>');
+            
+            // Checkbox Unchecked (- [ ])
+            processText = processText.replace(/- \[ \] (.*)/g, '<div class="flex items-center gap-3 mt-1.5"><input type="checkbox" disabled class="w-4 h-4 rounded border-slate-300 text-indigo-600"><span class="">$1</span></div>');
+
+            // Render ke pratinjau
+            highlightedResult.innerHTML = processText;
+        }
+
+        // Event Listeners
+        filterWordsInput.addEventListener('input', updateHighlight);
+        noteInput.addEventListener('input', updateHighlight);
+        autoNumberToggle.addEventListener('change', updateHighlight);
+    </script>
+
+</body>
+</html>
