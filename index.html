@@ -89,6 +89,15 @@
                 <textarea id="noteInput" rows="6" 
                     class="w-full p-4 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-400 outline-none transition-all shadow-sm resize-y" 
                     placeholder="Ketik catatanmu di sini..."></textarea>
+                
+                <!-- Statistik Catatan -->
+                <div class="flex justify-between items-center px-1 mt-2 text-[11px] text-slate-400 dark:text-slate-500 transition-colors">
+                    <div class="flex gap-4">
+                        <span>Kata: <strong id="wordCount" class="text-slate-600 dark:text-slate-300 font-semibold">0</strong></span>
+                        <span>Karakter: <strong id="charCount" class="text-slate-600 dark:text-slate-300 font-semibold">0</strong></span>
+                        <span>Baris: <strong id="lineCount" class="text-slate-600 dark:text-slate-300 font-semibold">0</strong></span>
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -149,6 +158,16 @@
         function updateHighlight() {
             let rawText = noteInput.value;
             const filterString = filterWordsInput.value;
+
+            // Hitung statistik teks asli
+            const charCount = rawText.length;
+            const lineCount = rawText === "" ? 0 : rawText.split('\n').length;
+            const words = rawText.trim().match(/\S+/g);
+            const wordCount = words ? words.length : 0;
+            
+            document.getElementById('charCount').innerText = charCount;
+            document.getElementById('lineCount').innerText = lineCount;
+            document.getElementById('wordCount').innerText = wordCount;
 
             if (!rawText.trim()) {
                 highlightedResult.innerHTML = '<span class="text-slate-400 dark:text-slate-500 italic">Hasil catatan akan muncul di sini...</span>';
