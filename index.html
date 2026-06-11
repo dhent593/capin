@@ -8,7 +8,16 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='28' fill='%234f46e5'/><path d='M30 35h40M30 50h40M30 65h25' stroke='white' stroke-width='8' stroke-linecap='round'/><circle cx='68' cy='68' r='10' fill='%2306b6d4'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { darkMode: 'class' }
+        tailwind.config = { darkMode: 'class' };
+        
+        // Deteksi tema secepatnya untuk mencegah flash warna putih pada dark mode
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
     </script>
     <style>
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
@@ -125,10 +134,17 @@
         const themeToggle = document.getElementById('themeToggle');
         const htmlElement = document.documentElement;
 
-        // Tema
+        // Tema & Sinkronisasi Ikon awal
+        function updateThemeIcon() {
+            document.getElementById('themeIcon').textContent = htmlElement.classList.contains('dark') ? '☀️' : '🌙';
+        }
+        updateThemeIcon();
+
         themeToggle.addEventListener('click', () => {
             htmlElement.classList.toggle('dark');
-            document.getElementById('themeIcon').textContent = htmlElement.classList.contains('dark') ? '☀️' : '🌙';
+            const isDark = htmlElement.classList.contains('dark');
+            updateThemeIcon();
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
         });
 
         // Keamanan
@@ -186,14 +202,40 @@
             // 2. Amankan dari tag HTML liar
             let processText = escapeHTML(rawText);
 
-            // 3. Highlight Filter Kata
+            // 3. Highlight Filter Kata dengan Warna Berbeda
             if (filterString.trim()) {
                 const wordsToHighlight = filterString.split(',').map(w => escapeHTML(w.trim())).filter(w => w.length > 0);
                 if (wordsToHighlight.length > 0) {
+                    // Daftar palette warna gradasi yang estetik untuk tiap kata
+                    const colors = [
+                        'from-amber-200 to-amber-300 dark:from-amber-500/80 dark:to-amber-600/80 text-amber-950 dark:text-amber-100',
+                        'from-emerald-200 to-emerald-300 dark:from-emerald-500/80 dark:to-emerald-600/80 text-emerald-950 dark:text-emerald-100',
+                        'from-cyan-200 to-cyan-300 dark:from-cyan-500/80 dark:to-cyan-600/80 text-cyan-950 dark:text-cyan-100',
+                        'from-rose-200 to-rose-300 dark:from-rose-500/80 dark:to-rose-600/80 text-rose-950 dark:text-rose-100',
+                        'from-violet-200 to-violet-300 dark:from-violet-500/80 dark:to-violet-600/80 text-violet-950 dark:text-violet-100',
+                        'from-orange-200 to-orange-300 dark:from-orange-500/80 dark:to-orange-600/80 text-orange-950 dark:text-orange-100',
+                        'from-fuchsia-200 to-fuchsia-300 dark:from-fuchsia-500/80 dark:to-fuchsia-600/80 text-fuchsia-950 dark:text-fuchsia-100'
+                    ];
+
                     const escapedWords = wordsToHighlight.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-                    const regex = new RegExp(`(${escapedWords.join('|')})`, 'gi');
-                    const hlStyle = '<span class="bg-gradient-to-r from-yellow-200 to-yellow-300 dark:from-yellow-500 dark:to-yellow-600 text-yellow-900 dark:text-white font-medium px-1.5 py-0.5 rounded-md shadow-sm transition-all">$1</span>';
-                    processText = processText.replace(regex, hlStyle);
+                    
+                    // Regex mencocokkan tag HTML (<...>) ATAU salah satu kata kunci filter
+                    const regex = new RegExp(`(<[^>]+>)|(${escapedWords.join('|')})`, 'gi');
+                    
+                    processText = processText.replace(regex, (match, htmlTag, wordMatch) => {
+                        // Jika kecocokan berupa tag HTML, biarkan utuh
+                        if (htmlTag) return htmlTag;
+                        
+                        // Jika kecocokan berupa kata kunci filter, temukan indeksnya untuk menentukan warna
+                        if (wordMatch) {
+                            const wordLower = wordMatch.toLowerCase();
+                            const wordIdx = wordsToHighlight.findIndex(w => w.toLowerCase() === wordLower);
+                            const colorClass = colors[wordIdx % colors.length];
+                            
+                            return `<span class="bg-gradient-to-r ${colorClass} font-semibold px-1.5 py-0.5 rounded-md shadow-sm transition-all">${wordMatch}</span>`;
+                        }
+                        return match;
+                    });
                 }
             }
 
